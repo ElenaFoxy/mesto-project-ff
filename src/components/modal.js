@@ -2,29 +2,24 @@
 export function openPopup(popup) {
   popup.classList.add("popup_is-opened");
   //обработчик события - нажатие ESC - добавляем
-  document.addEventListener("keydown", function (event) {
-    closePopupEsc(event, popup);
-  });
+  document.addEventListener("keydown", closePopupEsc);
 }
 
 export function closePopup(popup) {
   popup.classList.remove("popup_is-opened");
   //обработчик события удаляем
-  document.removeEventListener("keydown", function (event) {
-    closePopupEsc(event, popup);
-  });
+  document.removeEventListener("keydown", closePopupEsc);
 }
 
-//функция закрытия по esc
-export function closePopupEsc(evt, popup) {
+export function closePopupEsc(evt) {
   if (evt.key === "Escape") {
-    closePopup(popup);
+    closePopup(document.querySelector(".popup_is-opened"));
   }
 }
 
 //функция закрытия по клику на Оверлей
-export function closePopupOverlay(evt, popup) {
+export function closePopupOverlay(evt) {
   if (evt.currentTarget === evt.target) {
-    closePopup(popup);
+    closePopup(evt.currentTarget);
   }
 }

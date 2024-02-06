@@ -1,13 +1,12 @@
-@import url('../vendor/normalize.css');
-@import url('../vendor/fonts.css');
-@import url('../blocks/page/page.css');
-@import url('../blocks/header/header.css');
-@import url('../blocks/content/content.css');
-@import url('../blocks/footer/footer.css');
-@import url('../blocks/profile/profile.css');
-@import url('../blocks/places/places.css');
-@import url('../blocks/card/card.css');
-@import url('../blocks/popup/popup.css');
-@import url('../blocks/popup/_is-animated/popup_is-animated.css');
-@import url('../blocks/popup/_is-opened/popup_is-opened.css');
-
+@import url("./pages/vendor/normalize.css");
+@import url("./pages/vendor/fonts.css");
+@import url("./pages/blocks/page/page.css");
+@import url("./pages/blocks/header/header.css");
+@import url("./pages/blocks/content/content.css");
+@import url("./pages/blocks/footer/footer.css");
+@import url("./pages/blocks/profile/profile.css");
+@import url("./pages/blocks/places/places.css");
+@import url("./pages/blocks/card/card.css");
+@import url("./pages/blocks/popup/popup.css");
+@import url("./pages/blocks/popup/_is-animated/popup_is-animated.css");
+@import url("./pages/blocks/popup/_is-opened/popup_is-opened.css");
