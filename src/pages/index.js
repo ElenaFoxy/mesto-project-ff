@@ -13,6 +13,8 @@ const placeContainer = document.querySelector(".places__list");
 const popupEdit = document.querySelector(".popup_type_edit");
 //форма добавления фото
 const popupAdd = document.querySelector(".popup_type_new-card");
+//попап с фото
+const popupImage = document.querySelector(".popup_type_image");
 //кнопка редактирования профиля
 const editButton = document.querySelector(".profile__edit-button");
 //кнопка добавления фото
@@ -22,6 +24,8 @@ const addButton = document.querySelector(".profile__add-button");
 const closeButton = popupEdit.querySelector(".popup__close");
 //кнопка закрытия попапа добавления фото
 const closeButtonAdd = popupAdd.querySelector(".popup__close");
+//кнопка закрытия попап картинки
+const closeButtonImage = popupImage.querySelector(".popup__close");
 
 // @todo: Вывести карточки на страницу
 function showcards(cards) {
@@ -30,15 +34,15 @@ function showcards(cards) {
       item.link,
       item.name,
       deleteCard,
-      likeButton
+      likeButton,
+      openImage
     );
     placeContainer.append(cardElement);
   });
 }
+
 showcards(initialCards);
 
-//если на кнопку редактирования профиля нажали открываем попап
-popupEdit.classList.add("popup_is-animated");
 editButton.addEventListener("click", () => {
   //заполняем поля формы значениями профиля
   popupEdit.querySelector(".popup__input_type_name").value =
@@ -47,7 +51,6 @@ editButton.addEventListener("click", () => {
     document.querySelector(".profile__description").innerText;
   openPopup(popupEdit);
 });
-popupAdd.classList.add("popup_is-animated");
 //если на кнопку добавления фото нажали открываем попап
 addButton.addEventListener("click", () => openPopup(popupAdd));
 
@@ -55,7 +58,12 @@ addButton.addEventListener("click", () => openPopup(popupAdd));
 closeButton.addEventListener("click", () => closePopup(popupEdit));
 //если на кнопку добавления фото нажали закрываем попап
 closeButtonAdd.addEventListener("click", () => closePopup(popupAdd));
-
+closeButtonImage.addEventListener("click",  () => closePopup(popupImage));
+  
+//отслеживаем нажатие на оверлей попап картинки
+popupImage.addEventListener("click", function (event) {
+    closePopupOverlay(event);
+  });
 //закрываем форму нажатием на оверлей
 popupEdit.addEventListener("click", function (event) {
   closePopupOverlay(event);
@@ -65,35 +73,23 @@ popupAdd.addEventListener("click", function (event) {
 });
 
 //открываем окно с фото
-export function openImage(Image, Title) {
+export function openImage(image, title) {
   //попап с фото
   const popup = document.querySelector(".popup_type_image");
-  //кнопка закрытия попап картинки
-  const closeButton = popup.querySelector(".popup__close");
   //картинка в попап
   const popupImage = document.querySelector(".popup__image");
   //описание картинки в попап
   const popupCaption = document.querySelector(".popup__caption");
   //добавляем картинку в попап
-  popupImage.src = Image.src;
-  popupImage.alt = Image.alt;
-  popupCaption.textContent = Title.textContent;
+  popupImage.src = image.src;
+  popupImage.alt = image.alt;
+  popupCaption.textContent = title.textContent;
   //открываем попап
-  popup.classList.add("popup_is-animated");
   openPopup(popup);
-  closeButton.addEventListener("click", function () {
-    closePopup(popup);
-  });
-  //отслеживаем нажатие на оверлей
-  popup.addEventListener("click", function (event) {
-    closePopupOverlay(event);
-  });
 }
 
 //а теперь про Сохранить!
 
-// Находим форму в DOM
-//const formElement = document.querySelector(".popup_type_edit"); //document.querySelector('.edit-profile');// Воспользуйтесь методом querySelector()
 // Находим поля формы в DOM
 const nameInput = popupEdit.querySelector(".popup__input_type_name"); // Воспользуйтесь инструментом .querySelector()
 const jobInput = popupEdit.querySelector(".popup__input_type_description"); // Воспользуйтесь инструментом .querySelector()
@@ -130,14 +126,14 @@ const namePlace = formNewPlace.querySelector(".popup__input_type_card-name");
 const linkPlace = formNewPlace.querySelector(".popup__input_type_url");
 
 // Обработчик «отправки» формы добавления фото
-function AddPlaceSubmit(evt) {
+function addPlaceSubmit(evt) {
   evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы
   // значение полей имени и ссылка на фото
   const name = namePlace.value;
   const link = linkPlace.value;
 
   // Добавляем карточку в начало контейнера
-  const cardElement = createCard(link, name, deleteCard, likeButton);
+  const cardElement = createCard(link, name, deleteCard, likeButton, openImage);
   placeContainer.prepend(cardElement);
   closePopup(formNewPlace);
   namePlace.value = "";
@@ -146,6 +142,6 @@ function AddPlaceSubmit(evt) {
 
 // Прикрепляем обработчик к форме Добавления фото:
 // он будет следить за событием “submit” - «отправка»
-formNewPlace.addEventListener("submit", AddPlaceSubmit);
+formNewPlace.addEventListener("submit", addPlaceSubmit);
 
 export { cardTemplate, placeContainer };

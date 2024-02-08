@@ -1,5 +1,5 @@
-import { cardTemplate, placeContainer, openImage } from "../pages/index";
-export function createCard(link, name, deleteCallBack, likeImage) {
+import { cardTemplate } from "../pages/index";
+export function createCard(link, name, deleteCallBack, likeImage, openImage) {
   const cardElement = cardTemplate
     .querySelector(".places__item")
     .cloneNode(true);
@@ -19,9 +19,7 @@ export function createCard(link, name, deleteCallBack, likeImage) {
   cardElement.addEventListener("click", (evt) => likeImage(evt));
   
   //добавляем карточку в popup при нажатии на картинку открываем popup
-  cardImage.addEventListener("click", function () {
-    openImage(cardImage, cardTitle);
-  });
+  cardImage.addEventListener("click",  () => openImage(cardImage, cardTitle));
 
   return cardElement;
 }
