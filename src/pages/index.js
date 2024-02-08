@@ -58,12 +58,12 @@ addButton.addEventListener("click", () => openPopup(popupAdd));
 closeButton.addEventListener("click", () => closePopup(popupEdit));
 //если на кнопку добавления фото нажали закрываем попап
 closeButtonAdd.addEventListener("click", () => closePopup(popupAdd));
-closeButtonImage.addEventListener("click",  () => closePopup(popupImage));
-  
+closeButtonImage.addEventListener("click", () => closePopup(popupImage));
+
 //отслеживаем нажатие на оверлей попап картинки
 popupImage.addEventListener("click", function (event) {
-    closePopupOverlay(event);
-  });
+  closePopupOverlay(event);
+});
 //закрываем форму нажатием на оверлей
 popupEdit.addEventListener("click", function (event) {
   closePopupOverlay(event);

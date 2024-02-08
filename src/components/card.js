@@ -13,13 +13,13 @@ export function createCard(link, name, deleteCallBack, likeImage, openImage) {
 
   const deleteButton = cardElement.querySelector(".card__delete-button");
   deleteButton.addEventListener("click", () => deleteCallBack(cardElement));
-  
+
   //лайкаем изображения
   //реагируем на клик по кнопке с сердечком
   cardElement.addEventListener("click", (evt) => likeImage(evt));
-  
+
   //добавляем карточку в popup при нажатии на картинку открываем popup
-  cardImage.addEventListener("click",  () => openImage(cardImage, cardTitle));
+  cardImage.addEventListener("click", () => openImage(cardImage, cardTitle));
 
   return cardElement;
 }
@@ -34,5 +34,3 @@ export function likeButton(evt) {
   if (evt.target.classList.contains("card__like-button"))
     evt.target.classList.toggle("card__like-button_is-active");
 }
-
-
