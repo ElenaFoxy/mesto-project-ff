@@ -1,9 +1,22 @@
 // index.js
 
 import "../index.css"; //  импорт главного файла стилей
-import { initialCards } from "../components/cards";
 import { closePopupOverlay, closePopup, openPopup } from "../components/modal";
-import { deleteCard, createCard, likeButton } from "../components/card";
+import {
+  createCard,
+  likeButton,
+  isLikesMe,
+  deleteCard,
+} from "../components/card";
+import { enableValidation } from "../components/validation";
+import { clearValidation } from "../components/validation";
+import {
+  getInitialCards,
+  getInfoUser,
+  editInfoUser,
+  createNewCard,
+  editAvatar,
+} from "../components/Api";
 
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
@@ -15,10 +28,16 @@ const popupEdit = document.querySelector(".popup_type_edit");
 const popupAdd = document.querySelector(".popup_type_new-card");
 //попап с фото
 const popupImage = document.querySelector(".popup_type_image");
+//попап подтверждения удаления
+const popupConfirm = document.querySelector(".popup_type_delete");
+//попап смены аватара
+const popupAvatar = document.querySelector(".popup_type_avatar");
 //кнопка редактирования профиля
 const editButton = document.querySelector(".profile__edit-button");
 //кнопка добавления фото
 const addButton = document.querySelector(".profile__add-button");
+//аватар
+const avatarEdit = document.querySelector(".profile__image");
 
 //кнопка закрытия попапа редактирования профиля
 const closeButton = popupEdit.querySelector(".popup__close");
@@ -26,22 +45,66 @@ const closeButton = popupEdit.querySelector(".popup__close");
 const closeButtonAdd = popupAdd.querySelector(".popup__close");
 //кнопка закрытия попап картинки
 const closeButtonImage = popupImage.querySelector(".popup__close");
+//кнопка закрытия попап подтверждения
+const closeButtonConfirm = popupConfirm.querySelector(".popup__close");
+//кнопка закрытия попап подтверждения
+const closeButtonAvatar = popupAvatar.querySelector(".popup__close");
 
-// @todo: Вывести карточки на страницу
-function showcards(cards) {
-  cards.forEach((item) => {
-    const cardElement = createCard(
-      item.link,
-      item.name,
-      deleteCard,
-      likeButton,
-      openImage
-    );
-    placeContainer.append(cardElement);
-  });
+//поля формы в DOM Профиль
+const nameInput = popupEdit.querySelector(".popup__input_type_name");
+const jobInput = popupEdit.querySelector(".popup__input_type_description");
+const linkAvatar = popupAvatar.querySelector(".popup__input_type_avatar");
+
+//Информация профиля
+const nameProfile = document.querySelector(".profile__title");
+const jobProfile = document.querySelector(".profile__description");
+const avatarProfile = document.querySelector(".profile__image");
+
+const userInfo = {};
+
+//заполняем профиль
+function setProfile(user) {
+  nameProfile.textContent = user.name;
+  jobProfile.textContent = user.about;
+  avatarProfile.setAttribute("style", `background-image: url(${user.src});`);
 }
 
-showcards(initialCards);
+Promise.all([getInfoUser(), getInitialCards()])
+  .then(([user, Cards]) => {
+    userInfo.name = user.name;
+    userInfo.about = user.about;
+    userInfo.src = user.avatar;
+    userInfo.id = user._id;
+
+    setProfile(userInfo);
+    Cards.forEach((item) => {
+      const cardElement = createCard(
+        item.link,
+        item.name,
+        item.likes,
+        userInfo.id,
+        item._id,
+        item.owner._id,
+        deleteCard,
+        likeButton,
+        openImage
+      );
+
+      placeContainer.append(cardElement);
+      if (item.likes.length > 0) {
+        const likesCount = document.querySelector(".card__like-number");
+        likesCount.textContent = item.likes.length;
+        if (isLikesMe(userInfo.id, item.likes)) {
+          cardElement
+            .querySelector(".card__like-button")
+            .classList.add("card__like-button_is-active");
+        }
+      }
+    });
+  })
+  .catch((err) => {
+    console.log(err); // выведем ошибку в консоль
+  });
 
 editButton.addEventListener("click", () => {
   //заполняем поля формы значениями профиля
@@ -49,16 +112,25 @@ editButton.addEventListener("click", () => {
     document.querySelector(".profile__title").innerText;
   popupEdit.querySelector(".popup__input_type_description").value =
     document.querySelector(".profile__description").innerText;
+  clearValidation(popupEdit);
   openPopup(popupEdit);
 });
 //если на кнопку добавления фото нажали открываем попап
-addButton.addEventListener("click", () => openPopup(popupAdd));
+addButton.addEventListener("click", () => {
+  clearValidation(popupAdd);
+  openPopup(popupAdd);
+});
+
+//открыть окно редактировать аватар
+avatarEdit.addEventListener("click", () => openPopup(popupAvatar));
 
 //если на кнопку закрытия формы нажали закрываем попап
 closeButton.addEventListener("click", () => closePopup(popupEdit));
 //если на кнопку добавления фото нажали закрываем попап
 closeButtonAdd.addEventListener("click", () => closePopup(popupAdd));
 closeButtonImage.addEventListener("click", () => closePopup(popupImage));
+closeButtonConfirm.addEventListener("click", () => closePopup(popupConfirm));
+closeButtonAvatar.addEventListener("click", () => closePopup(popupAvatar));
 
 //отслеживаем нажатие на оверлей попап картинки
 popupImage.addEventListener("click", function (event) {
@@ -69,6 +141,12 @@ popupEdit.addEventListener("click", function (event) {
   closePopupOverlay(event);
 });
 popupAdd.addEventListener("click", function (event) {
+  closePopupOverlay(event);
+});
+popupConfirm.addEventListener("click", function (event) {
+  closePopupOverlay(event);
+});
+popupAvatar.addEventListener("click", function (event) {
   closePopupOverlay(event);
 });
 
@@ -90,35 +168,59 @@ export function openImage(image, title) {
 
 //а теперь про Сохранить!
 
-// Находим поля формы в DOM
-const nameInput = popupEdit.querySelector(".popup__input_type_name"); // Воспользуйтесь инструментом .querySelector()
-const jobInput = popupEdit.querySelector(".popup__input_type_description"); // Воспользуйтесь инструментом .querySelector()
-
-// Обработчик «отправки» формы, хотя пока
-// она никуда отправляться не будет
+// Обработчик «отправки» формы
 function changeProfile(evt) {
   evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
-  // Так мы можем определить свою логику отправки.
-  // О том, как это делать, расскажем позже.
 
   // Получите значение полей jobInput и nameInput из свойства value
   const name = nameInput.value;
   const job = jobInput.value;
-  // Выберите элементы, куда должны быть вставлены значения полей
-  const nameProfile = document.querySelector(".profile__title");
-  const jobProfile = document.querySelector(".profile__description");
-  // Вставьте новые значения с помощью
-  nameProfile.textContent = name;
-  jobProfile.textContent = job;
-  closePopup(popupEdit);
+
+  const editInfoButton = popupAvatar.querySelector(".popup__button");
+  editInfoButton.textContent = "Сохранение...";
+  // Вставить новое значение
+  editInfoUser(name, job)
+    .then(() => {
+      nameProfile.textContent = name;
+      jobProfile.textContent = job;
+      closePopup(popupEdit);
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+      editInfoButton.textContent = "Сохранить";
+    });
 }
 
 // Прикрепляем обработчик к форме:
 // он будет следить за событием “submit” - «отправка»
 popupEdit.addEventListener("submit", changeProfile);
 
-//а теперь про Добавить Фото!
+function changeAvatar(evt) {
+  evt.preventDefault(); // Эта строчка отменяет стандартную отправку формы.
 
+  // Получите значение поля Input из свойства value
+  const link = linkAvatar.value;
+  const editAvatarButton = popupAvatar.querySelector(".popup__button");
+  editAvatarButton.textContent = "Сохранение...";
+  // Вставить новое значение
+  editAvatar(link)
+    .then(() => {
+      avatarProfile.setAttribute("style", `background-image: url(${link});`);
+      closePopup(popupAvatar);
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+      editAvatarButton.textContent = "Сохранить";
+    });
+}
+
+popupAvatar.addEventListener("submit", changeAvatar);
+
+//а теперь про Добавить Фото!
 // Находим форму в DOM
 const formNewPlace = document.querySelector(".popup_type_new-card");
 // Находим поля формы в DOM
@@ -131,17 +233,39 @@ function addPlaceSubmit(evt) {
   // значение полей имени и ссылка на фото
   const name = namePlace.value;
   const link = linkPlace.value;
-
-  // Добавляем карточку в начало контейнера
-  const cardElement = createCard(link, name, deleteCard, likeButton, openImage);
-  placeContainer.prepend(cardElement);
-  closePopup(formNewPlace);
-  namePlace.value = "";
-  linkPlace.value = "";
+  const newPlaceButton = formNewPlace.querySelector(".popup__button");
+  newPlaceButton.textContent = "Сохранение...";
+  createNewCard(name, link)
+    .then(() => {
+      // Добавляем карточку
+      const cardElement = createCard(
+        link,
+        name,
+        this.likes,
+        userInfo.id,
+        this._id,
+        userInfo.id,
+        deleteCard,
+        likeButton,
+        openImage
+      );
+      placeContainer.prepend(cardElement);
+      closePopup(formNewPlace);
+      namePlace.value = "";
+      linkPlace.value = "";
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+    .finally(() => {
+      newPlaceButton.textContent = "Сохранить";
+    });
 }
 
 // Прикрепляем обработчик к форме Добавления фото:
 // он будет следить за событием “submit” - «отправка»
 formNewPlace.addEventListener("submit", addPlaceSubmit);
+
+enableValidation();
 
 export { cardTemplate, placeContainer };

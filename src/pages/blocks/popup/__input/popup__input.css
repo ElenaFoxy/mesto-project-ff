@@ -10,8 +10,41 @@
   margin-bottom: 10px;
 }
 
+.popup__error_visible {
+  font-size: 12px;
+  line-height: 14.52px;
+  color: #ff0000;
+  display: block;
+  width: 358px;
+  min-height: 12px;
+  border-top: 1px solid #FF0000;
+  padding-top: 5px;
+}
+
+.popup__error_visible:last-of-type {
+  margin-bottom: 0;
+}
+
 .popup__input:last-of-type {
   margin-bottom: 0;
+}
+
+.popup__input-position {
+  margin: 0 0 30px 0;
+  padding: 0 0 13px 0;
+  height: 43px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.popup__input-position:last-of-type{
+  margin: 0;
+}
+
+@media screen and (max-width: 544px) {
+  .popup__input-error {
+    width: 238px;
+  }
 }
 
 @media screen and (max-width: 568px) {

@@ -14,6 +14,22 @@
   margin-top: 48px;
 }
 
+/* это я добавила неактивная кнопка*/
+.popup__button_disabled {
+  display: block;
+  color: #B8B8B8;
+  background: #EDEDED;
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  }
+  
+.popup__button_disabled:hover {
+  opacity: 0.2;
+}
+
 .popup__button:hover {
   background: rgba(0, 0, 0, 0.8);
   cursor: pointer;

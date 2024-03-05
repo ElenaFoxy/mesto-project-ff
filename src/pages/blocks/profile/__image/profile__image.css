@@ -20,3 +20,20 @@
     margin-right: 0;
   }
 }
+.profile__image:hover {
+  background: rgba(0, 0, 0, 0.8);
+  opacity: 20%;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+}
+
+.profile__image:hover::before {
+  content: "";
+  display: block;
+  background: transparent url("../../../images/editAva.png") center no-repeat;
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  color: #ffffff;
+}
