@@ -7,6 +7,7 @@ import {
   likeButton,
   isLikesMe,
   deleteCard,
+  setLikes,
 } from "../components/card";
 import { enableValidation } from "../components/validation";
 import { clearValidation } from "../components/validation";
@@ -18,6 +19,18 @@ import {
   editAvatar,
 } from "../components/Api";
 
+//переменная для хранения Идентификатора карточки удаления
+export let delCards;
+
+// валидация форм
+const configValidation = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+};
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
 // @todo: DOM узлы
@@ -66,40 +79,40 @@ const userInfo = {};
 function setProfile(user) {
   nameProfile.textContent = user.name;
   jobProfile.textContent = user.about;
+}
+
+function setAvatar(user) {
   avatarProfile.setAttribute("style", `background-image: url(${user.src});`);
 }
 
+const deleteCardCallback = (cardElement, cardId) => {
+  popupConfirm.dataset.idcard = cardId;
+  delCards = cardElement;
+  openPopup(popupConfirm);
+};
+
 Promise.all([getInfoUser(), getInitialCards()])
-  .then(([user, Cards]) => {
+  .then(([user, cards]) => {
     userInfo.name = user.name;
     userInfo.about = user.about;
     userInfo.src = user.avatar;
     userInfo.id = user._id;
 
     setProfile(userInfo);
-    Cards.forEach((item) => {
+    setAvatar(userInfo);
+
+    cards.forEach((item) => {
       const cardElement = createCard(
-        item.link,
-        item.name,
-        item.likes,
+        item,
         userInfo.id,
-        item._id,
-        item.owner._id,
-        deleteCard,
+        deleteCardCallback,
         likeButton,
         openImage
       );
 
       placeContainer.append(cardElement);
-      if (item.likes.length > 0) {
-        const likesCount = document.querySelector(".card__like-number");
-        likesCount.textContent = item.likes.length;
-        if (isLikesMe(userInfo.id, item.likes)) {
-          cardElement
-            .querySelector(".card__like-button")
-            .classList.add("card__like-button_is-active");
-        }
-      }
+
+      setLikes(cardElement, item, userInfo.id);
     });
   })
   .catch((err) => {
@@ -112,12 +125,12 @@ editButton.addEventListener("click", () => {
     document.querySelector(".profile__title").innerText;
   popupEdit.querySelector(".popup__input_type_description").value =
     document.querySelector(".profile__description").innerText;
-  clearValidation(popupEdit);
+  clearValidation(configValidation, popupEdit);
   openPopup(popupEdit);
 });
 //если на кнопку добавления фото нажали открываем попап
 addButton.addEventListener("click", () => {
-  clearValidation(popupAdd);
+  clearValidation(configValidation, popupAdd);
   openPopup(popupAdd);
 });
 
@@ -180,9 +193,8 @@ function changeProfile(evt) {
   editInfoButton.textContent = "Сохранение...";
   // Вставить новое значение
   editInfoUser(name, job)
-    .then(() => {
-      nameProfile.textContent = name;
-      jobProfile.textContent = job;
+    .then((res) => {
+      setProfile(res);
       closePopup(popupEdit);
     })
     .catch((err) => {
@@ -206,8 +218,9 @@ function changeAvatar(evt) {
   editAvatarButton.textContent = "Сохранение...";
   // Вставить новое значение
   editAvatar(link)
-    .then(() => {
-      avatarProfile.setAttribute("style", `background-image: url(${link});`);
+    .then((res) => {
+      setAvatar(res);
+      //   avatarProfile.setAttribute("style", `background-image: url(${link});`);
       closePopup(popupAvatar);
     })
     .catch((err) => {
@@ -236,14 +249,10 @@ function addPlaceSubmit(evt) {
   const newPlaceButton = formNewPlace.querySelector(".popup__button");
   newPlaceButton.textContent = "Сохранение...";
   createNewCard(name, link)
-    .then(() => {
+    .then((resCard) => {
       // Добавляем карточку
       const cardElement = createCard(
-        link,
-        name,
-        this.likes,
-        userInfo.id,
-        this._id,
+        resCard,
         userInfo.id,
         deleteCard,
         likeButton,
@@ -266,6 +275,6 @@ function addPlaceSubmit(evt) {
 // он будет следить за событием “submit” - «отправка»
 formNewPlace.addEventListener("submit", addPlaceSubmit);
 
-enableValidation();
+enableValidation(configValidation);
 
 export { cardTemplate, placeContainer };

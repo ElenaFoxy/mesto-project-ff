@@ -1,17 +1,12 @@
 // включение валидации вызовом enableValidation
 // все настройки передаются при вызове
 
-// валидация форм
-const configValidation = {
-  formSelector: ".popup__form",
-  inputSelector: ".popup__input",
-  submitButtonSelector: ".popup__button",
-  inactiveButtonClass: "popup__button_disabled",
-  inputErrorClass: "popup__input_type_error",
-  errorClass: "popup__error_visible",
-};
-
-const showError = (formElement, inputElement, errorMessage) => {
+const showError = (
+  configValidation,
+  formElement,
+  inputElement,
+  errorMessage
+) => {
   //ошибка, которая найдена внутри formElement
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
   //класс ошибки элемента input
@@ -22,7 +17,7 @@ const showError = (formElement, inputElement, errorMessage) => {
   errorElement.classList.add(configValidation.errorClass);
 };
 
-const hideError = (formElement, inputElement) => {
+const hideError = (configValidation, formElement, inputElement) => {
   //ошибка, которая найдена внутри formElement
   const errorElement = formElement.querySelector(`.${inputElement.id}-error`);
   // удалить класс ошибки с элемента input
@@ -36,13 +31,14 @@ const hideError = (formElement, inputElement) => {
 //проверка поля ввода на корректность
 //formElement - форма проверки
 //inputElement - поле проверки
-const checkInputValidity = (formElement, inputElement) => {
+const checkInputValidity = (configValidation, formElement, inputElement) => {
   //дело в паттерне?
   if (inputElement.validity.patternMismatch) {
     // встроенный метод setCustomValidity принимает на вход строку
     // и заменяет ею стандартное сообщение об ошибке
     inputElement.setCustomValidity(
-      "Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
+      inputElement.dataset.error
+      //"Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
     );
   } else {
     // не в паттерне
@@ -52,10 +48,15 @@ const checkInputValidity = (formElement, inputElement) => {
   // не прошло проверку
   if (!inputElement.validity.valid) {
     //ошибка
-    showError(formElement, inputElement, inputElement.validationMessage);
+    showError(
+      configValidation,
+      formElement,
+      inputElement,
+      inputElement.validationMessage
+    );
   } else {
     //все ок
-    hideError(formElement, inputElement);
+    hideError(configValidation, formElement, inputElement);
   }
 };
 
@@ -72,7 +73,7 @@ const hasInvalidInput = (inputList) => {
 };
 
 //блокировка кнопки в случае, если проверка не пройдена формой
-const toggleButtonState = (inputList, buttonElement) => {
+const toggleButtonState = (configValidation, inputList, buttonElement) => {
   // Если есть хотя бы один невалидный инпут
   if (hasInvalidInput(inputList)) {
     // сделай кнопку неактивной
@@ -86,7 +87,7 @@ const toggleButtonState = (inputList, buttonElement) => {
 };
 
 //добавляем слушатели на все поля формы
-const setEventListeners = (formElement) => {
+const setEventListeners = (configValidation, formElement) => {
   //все поля формы с классом inputSelector
   const inputList = Array.from(
     formElement.querySelectorAll(configValidation.inputSelector)
@@ -97,21 +98,21 @@ const setEventListeners = (formElement) => {
   );
 
   // чтобы проверить состояние кнопки в самом начале
-  toggleButtonState(inputList, buttonElement);
+  toggleButtonState(configValidation, inputList, buttonElement);
   inputList.forEach((inputElement) => {
     // каждому полю добавим обработчик события input
     inputElement.addEventListener("input", () => {
       // Внутри колбэка вызовем isValid,
       // передав ей форму и проверяемый элемент
-      checkInputValidity(formElement, inputElement);
+      checkInputValidity(configValidation, formElement, inputElement);
       // чтобы проверять его при изменении любого из полей
-      toggleButtonState(inputList, buttonElement);
+      toggleButtonState(configValidation, inputList, buttonElement);
     });
   });
 };
 
 //очистка ошибок валидации - на открытие формы
-export const clearValidation = (formValidation) => {
+export const clearValidation = (configValidation, formValidation) => {
   const inputList = Array.from(
     formValidation.querySelectorAll(configValidation.inputSelector)
   );
@@ -119,16 +120,16 @@ export const clearValidation = (formValidation) => {
     configValidation.submitButtonSelector
   );
   inputList.forEach((popupInput) => {
-    hideError(formValidation, popupInput);
+    hideError(configValidation, formValidation, popupInput);
     popupInput.setCustomValidity(" ");
   });
-
-  toggleButtonState(inputList, buttonElement);
+  formValidation.reset;
+  toggleButtonState(configValidation, inputList, buttonElement);
 };
 
 //setEventListeners(formElement);
 
-export const enableValidation = () => {
+export const enableValidation = (configValidation) => {
   //все формы
   const formList = Array.from(
     document.querySelectorAll(configValidation.formSelector)
@@ -138,6 +139,6 @@ export const enableValidation = () => {
     formElement.addEventListener("submit", function (evt) {
       evt.preventDefault();
     });
-    setEventListeners(formElement);
+    setEventListeners(configValidation, formElement);
   });
 };

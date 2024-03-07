@@ -17,3 +17,19 @@
 .card__like-button:hover {
   opacity: 0.6;
 }
+
+.card__like-number {
+  color: #000;
+  font-size: 13px;
+  line-height: 15.73px;
+  font-style: normal;
+  font-weight: 400;
+}
+
+
+.card__likes-and-number {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
