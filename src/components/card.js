@@ -22,11 +22,12 @@ export function setLikes(cardElement, card, UserId) {
 export function likeButton(cardElement, card, id) {
   const likeCardButton = cardElement.querySelector(".card__like-button");
   const likesCount = cardElement.querySelector(".card__like-number");
-  const isLiked = cardElement.classList.contains("card__like-button_is-active");
-  const likeMethod = isLiked ? deleteLike : addLike;
+  //const isLiked = cardElement.classList.contains("card__like-button_is-active");
+  const likeMethod = isLikesMe(id, card.likes) ? deleteLike : addLike;
   likeMethod(card._id)
     .then((res) => {
-      likesCount.textContent = res.likes.length;
+      if (res.likes.length > 0) {
+      likesCount.textContent = res.likes.length;} else {likesCount.textContent="";}
       likeCardButton.classList.toggle("card__like-button_is-active");
     })
     .catch((err) => {
@@ -80,6 +81,7 @@ export function createCard(card, idUser, deleteCallBack, likeImage, openImage) {
   //реагируем на клик по кнопке с сердечком
   const likeCardButton = cardElement.querySelector(".card__like-button");
   likeCardButton.addEventListener("click", () => {
+    console.log(card);
     likeImage(cardElement, card, idUser);
   });
 
