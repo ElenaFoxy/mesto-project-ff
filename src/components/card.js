@@ -19,11 +19,11 @@ export function setLikes(cardElement, card, UserId) {
 }
 
 //функция like фото
-export function likeButton(cardElement, card, id) {
+export function likeButton(cardElement, card) {
   const likeCardButton = cardElement.querySelector(".card__like-button");
   const likesCount = cardElement.querySelector(".card__like-number");
-  //const isLiked = cardElement.classList.contains("card__like-button_is-active");
-  const likeMethod = isLikesMe(id, card.likes) ? deleteLike : addLike;
+  const isLiked = cardElement.classList.contains("card__like-button_is-active");
+  const likeMethod = isLiked ? deleteLike : addLike;
   likeMethod(card._id)
     .then((res) => {
       if (res.likes.length > 0) {
@@ -81,8 +81,8 @@ export function createCard(card, idUser, deleteCallBack, likeImage, openImage) {
   //реагируем на клик по кнопке с сердечком
   const likeCardButton = cardElement.querySelector(".card__like-button");
   likeCardButton.addEventListener("click", () => {
-    console.log(card);
-    likeImage(cardElement, card, idUser);
+    //console.log(card);
+    likeImage(cardElement, card);
   });
 
   //добавляем карточку в popup при нажатии на картинку открываем popup
